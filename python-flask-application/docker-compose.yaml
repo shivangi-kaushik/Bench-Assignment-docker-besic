@@ -13,7 +13,7 @@ services:
 
     # Port mapping
     # Format: "HOST_PORT:CONTAINER_PORT"
-    # Access app on localhost:5001
+    # Access app on localhost:5001.
     ports:
       - "5001:5000"
 

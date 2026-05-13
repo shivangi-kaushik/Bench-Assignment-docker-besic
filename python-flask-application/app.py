@@ -11,7 +11,7 @@ def home():
     return render_template('index.html')
 
 
-# Used to verify if the application is running properly
+# Used to verify if the application is running properly.
 @app.route('/health')
 def health():
 
