@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all application files into the container
 COPY . .
 
-# Inform Docker that the application will run on port 5000
+# Inform Docker that the application will run on port 5000.
 EXPOSE 5000
 
 # Command to start the Flask application when container starts
