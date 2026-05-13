@@ -1,15 +1,31 @@
+# Docker Compose version
 version: '3.9'
-
+# Each container/application is defined here.
 services:
 
   web:
-    build: .
-    container_name: flask-web
-    ports:
-      - "5000:5000"
 
-  redis:
-    image: redis:latest
-    container_name: redis-server
+    # Build Docker image using Dockerfile
+    # present in the current directory
+    build: .
+
+    container_name: flask-web
+
+    # Port mapping
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # Access app on localhost:5001
     ports:
-      - "6379:6379"
+      - "5001:5000"
+
+  # Redis service
+  redis:
+
+    # Pull latest Redis image from Docker Hub
+    image: redis:latest
+
+    # Custom name for Redis container
+    container_name: redis-server
+
+    # Redis port mapping
+    ports:
+      - "6380:6379"
