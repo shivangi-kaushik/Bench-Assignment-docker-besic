@@ -9,7 +9,12 @@ pipeline{
         }
         stage('Build'){
             steps{
-                sh 'docker build -t flask-web-app:latest .'
+                dir('python-flask-application') {
+
+                   sh 'ls -la'
+
+                    sh 'docker build -t flask-web-app:latest .'
+            }
             }
         }
         stage('Push'){
