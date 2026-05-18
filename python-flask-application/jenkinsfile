@@ -1,0 +1,26 @@
+pipline{
+    agent any
+    stages{
+
+        stage('Checkout'){
+            steps{
+               sh 'git clone https://github.com/shivangi-kaushik/Bench-Assignment-docker-besic.git'
+            }
+        }
+        stage('Build'){
+            steps{
+                echo 'Building...'
+            }
+        }
+        stage('Test'){
+            steps{
+                echo 'Testing...'
+            }
+        }
+        stage('Deploy'){
+            steps{
+                echo 'Deploying...'
+            }
+        }
+    }
+}
