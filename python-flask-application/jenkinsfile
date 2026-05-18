@@ -1,4 +1,4 @@
-pipline{
+pipeline{
     agent any
     stages{
 
@@ -9,17 +9,24 @@ pipline{
         }
         stage('Build'){
             steps{
-                echo 'Building...'
+                sh 'docker build -t flask-web-app:latest .'
             }
         }
-        stage('Test'){
+        stage('Push'){
             steps{
-                echo 'Testing...'
+                echo 'Pushing...'
+                withcredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    sh '''docker tag flask-web-app:latest shivangikaushik/flask-web-app:latest
+                      docker push shivangikaushik/flask-web-app:latest
+                      docker pull shivangikaushik/flask-web-app:latest'''
+                }
+                
             }
         }
         stage('Deploy'){
             steps{
                 echo 'Deploying...'
+                sh 'docker run -d -p 5000:5000 shivangikaushik/flask-web-app:latest'
             }
         }
     }
