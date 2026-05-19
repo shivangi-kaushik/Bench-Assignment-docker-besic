@@ -1,12 +1,51 @@
-pipeline{
-    agent any
-    stages{
+pipeline {
 
-        stage('Checkout'){
-            steps{
-               sh 'git clone https://github.com/shivangi-kaushik/Bench-Assignment-docker-besic.git'
+    // Run pipeline on any available Jenkins agent
+    agent any
+
+    // Global environment variables
+    environment {
+
+        // Docker image name
+        IMAGE_NAME = "shivangikaushik/flask-web-app"
+
+        // Docker image tag
+        IMAGE_TAG  = "latest"
+    }
+
+    stages {
+
+        // ==============================
+        // Stage 1 : Checkout Source Code
+        // ==============================
+        stage('Checkout') {
+
+            steps {
+
+                // Clone GitHub repository from specific branch
+                git branch: 'feature/docker-basic',
+                url: 'https://github.com/shivangi-kaushik/Bench-Assignment-docker-besic.git'
             }
         }
+<<<<<<< HEAD
+
+        // ==============================
+        // Stage 2 : Build Docker Image
+        // ==============================
+        stage('Build Docker Image') {
+
+            steps {
+
+                // Move inside application directory
+                dir('python-flask-application') {
+
+                    // List files for verification/debugging
+                    sh 'ls -la'
+
+                    // Build Docker image using Dockerfile
+                    sh 'docker build -t flask-web-app:latest .'
+                }
+=======
         stage('Build'){
             steps{
                 dir('python-flask-application') {
@@ -15,24 +54,85 @@ pipeline{
 
                     sh 'docker build -t flask-web-app:latest .'
             }
+>>>>>>> 8e25afa3f616d3bb29187c0f498992b6cf80c854
             }
         }
-        stage('Push'){
-            steps{
-                echo 'Pushing...'
-                withcredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh '''docker tag flask-web-app:latest shivangikaushik/flask-web-app:latest
-                      docker push shivangikaushik/flask-web-app:latest
-                      docker pull shivangikaushik/flask-web-app:latest'''
+
+        // ==============================
+        // Stage 3 : Push Image to Docker Hub
+        // ==============================
+        stage('Push Docker Image') {
+
+            steps {
+
+                // Fetch Docker Hub credentials securely from Jenkins
+                withCredentials([usernamePassword(
+
+                    // Jenkins credential ID
+                    credentialsId: 'docker-creds',
+
+                    // Store username in environment variable
+                    usernameVariable: 'DOCKERHUB_USERNAME',
+
+                    // Store password/token in environment variable
+                    passwordVariable: 'DOCKERHUB_PASSWORD'
+                )]) {
+
+                    sh '''
+
+                    # Login to Docker Hub securely
+                    echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+                    # Tag local image with Docker Hub repository name
+                    docker tag flask-web-app:latest $IMAGE_NAME:$IMAGE_TAG
+
+                    # Push image to Docker Hub
+                    docker push $IMAGE_NAME:$IMAGE_TAG
+                    '''
                 }
-                
             }
         }
-        stage('Deploy'){
-            steps{
-                echo 'Deploying...'
-                sh 'docker run -d -p 5000:5000 shivangikaushik/flask-web-app:latest'
+
+        // ==============================
+        // Stage 4 : Deploy Container
+        // ==============================
+        stage('Deploy Container') {
+
+            steps {
+
+                sh '''
+
+                # Stop existing container if running
+                docker stop flask-container || true
+
+                # Remove old container if exists
+                docker rm flask-container || true
+
+                # Run new container from latest image
+                docker run -d \
+                --name flask-container \
+                -p 5000:5000 \
+                $IMAGE_NAME:$IMAGE_TAG
+                '''
             }
+        }
+    }
+
+    // ==============================
+    // Post Build Actions
+    // ==============================
+    post {
+
+        // Executes when pipeline succeeds
+        success {
+
+            echo 'Pipeline executed successfully'
+        }
+
+        // Executes when pipeline fails
+        failure {
+
+            echo 'Pipeline failed'
         }
     }
 }
